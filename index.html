@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Resilience &amp; Risk — Project Update</title>
+<style>
+  :root{
+    --bg:#f5f4f0; --surface:#ffffff; --ink:#1d1d1b; --muted:#5f5e58;
+    --line:rgba(0,0,0,.10); --line-strong:rgba(0,0,0,.18);
+    --live:#0f6e56; --live-bg:#e1f5ee;
+    --dev:#854f0b; --dev-bg:#faeeda;
+    --act:#185fa5; --act-bg:#e6f1fb;
+    --accent:#534ab7; --accent-bg:#eeedfe;
+    --radius:14px;
+    --font:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1a1a18; --surface:#252522; --ink:#f2f1ec; --muted:#a8a79f;
+      --line:rgba(255,255,255,.12); --line-strong:rgba(255,255,255,.20);
+      --live:#5dcaa5; --live-bg:#0f3a2f;
+      --dev:#efaf4f; --dev-bg:#4a3206;
+      --act:#85b7eb; --act-bg:#0c2c4a;
+      --accent:#afa9ec; --accent-bg:#2d2856;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
+  header.top{margin-bottom:1.75rem;}
+  .eyebrow{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 .35rem;}
+  h1{font-size:30px;font-weight:600;margin:0 0 .4rem;line-height:1.2;}
+  .lede{font-size:16px;color:var(--muted);margin:0;max-width:60ch;}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin:1.5rem 0 .25rem;}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:.6rem .9rem;display:flex;align-items:center;gap:.5rem;}
+  .stat b{font-size:18px;font-weight:600;}
+  .stat span{font-size:13px;color:var(--muted);}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .filters{display:flex;flex-wrap:wrap;gap:8px;margin:1.75rem 0 1.25rem;}
+  .chip{font:inherit;font-size:13px;cursor:pointer;border:1px solid var(--line-strong);background:transparent;color:var(--ink);
+        padding:.4rem .85rem;border-radius:99px;transition:.15s;}
+  .chip:hover{background:var(--surface);}
+  .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.1rem 1.2rem;
+        display:flex;flex-direction:column;transition:.18s;}
+  .card.featured{border:2px solid var(--accent);grid-column:1/-1;}
+  .card-head{display:flex;align-items:flex-start;gap:.7rem;}
+  .ic{font-size:22px;line-height:1;flex-shrink:0;}
+  .card h2{font-size:17px;font-weight:600;margin:0;flex:1;}
+  .pill{font-size:11.5px;font-weight:600;padding:.2rem .55rem;border-radius:99px;white-space:nowrap;}
+  .pill.live{background:var(--live-bg);color:var(--live);}
+  .pill.dev{background:var(--dev-bg);color:var(--dev);}
+  .pill.act{background:var(--act-bg);color:var(--act);}
+  .ribbon{display:inline-block;font-size:11.5px;font-weight:600;color:var(--accent);background:var(--accent-bg);
+          padding:.2rem .6rem;border-radius:99px;margin-bottom:.5rem;width:max-content;}
+  .one{font-size:14.5px;color:var(--muted);margin:.7rem 0 0;}
+  .detail{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .detail-inner{padding-top:.85rem;font-size:14.5px;}
+  .detail-inner ul{margin:.5rem 0 0;padding-left:1.1rem;}
+  .detail-inner li{margin:.2rem 0;}
+  .row{display:flex;align-items:center;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;}
+  .more{font:inherit;font-size:13.5px;cursor:pointer;background:transparent;border:none;color:var(--act);padding:0;}
+  .more:hover{text-decoration:underline;}
+  .cta{font:inherit;font-size:13.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;
+       background:var(--ink);color:var(--bg);padding:.5rem .9rem;border-radius:9px;transition:.15s;}
+  .cta:hover{opacity:.88;}
+  .cta.ghost{background:transparent;color:var(--ink);border:1px solid var(--line-strong);}
+  .count{display:flex;gap:.9rem;margin:.9rem 0 .2rem;}
+  .count div{background:var(--accent-bg);border-radius:10px;padding:.5rem .8rem;text-align:center;min-width:62px;}
+  .count b{display:block;font-size:24px;font-weight:700;color:var(--accent);line-height:1;}
+  .count span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;}
+  footer{margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--line);font-size:13px;color:var(--muted);}
+  footer a{color:var(--act);}
+  .hidden{display:none!important;}
+  @media(max-width:520px){h1{font-size:24px;} .wrap{padding:1.75rem 1rem 3rem;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <p class="eyebrow">Resilience &amp; Risk · Contractor update</p>
+    <h1>Where things stand — June 2026</h1>
+    <p class="lede">A quick, skimmable look at the projects on the go. Tap any card to read more, and use the buttons to get involved where you can.</p>
+
+    <div class="stats" id="stats">
+      <div class="stat"><span class="dot" style="background:var(--live)"></span><b id="c-live">0</b><span>live now</span></div>
+      <div class="stat"><span class="dot" style="background:var(--dev)"></span><b id="c-dev">0</b><span>in development</span></div>
+      <div class="stat"><span class="dot" style="background:var(--act)"></span><b id="c-act">0</b><span>get involved</span></div>
+    </div>
+  </header>
+
+  <div class="filters" id="filters">
+    <button class="chip" data-f="all" aria-pressed="true">All</button>
+    <button class="chip" data-f="live" aria-pressed="false">Live now</button>
+    <button class="chip" data-f="dev" aria-pressed="false">In development</button>
+    <button class="chip" data-f="act" aria-pressed="false">Get involved</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <p>Questions, or want to be involved in any of the above? Just reply to this email or get in touch with me directly.<br>
+    Last updated June 2026.</p>
+  </footer>
+</div>
+
+<script>
+  /* ---- EDIT THESE LINKS ----
+     Swap in your real email and any direct links (KLMS, sign-up forms, etc.).
+     Leave as a mailto: and it opens the reader's email client pre-addressed to you. */
+  var E_USER = "helen.salvini", E_DOM = "thekirkwood.org.uk";   // split so the full address never sits in the page source (deters spam scrapers)
+  var CONFIG = {
+    contactEmail: E_USER + "@" + E_DOM,
+    jupiterLink:  "mailto:" + E_USER + "@" + E_DOM + "?subject=Exercise%20Jupiter%20-%20count%20me%20in",  // <-- replace with MS Form link when ready
+    jupiterDate:  "2026-09-10T09:00:00"
+  };
+
+  function mail(subject){ return "mailto:"+CONFIG.contactEmail+"?subject="+encodeURIComponent(subject); }
+
+  var PROJECTS = [
+    {
+      key:"jupiter", featured:true, icon:"🚨", title:"Exercise Jupiter", status:"act", statusLabel:"Get involved",
+      one:"An ‘as-live’ evacuation exercise on 10 September — and we want you in it.",
+      countdown:true,
+      detail:"This is the one we're most excited about. Exercise Jupiter is an ‘as-live’ evacuation exercise taking place on <b>10 September</b>."
+        +"<ul>"
+        +"<li><b>Join the planning team</b> in the run-up to the day.</li>"
+        +"<li><b>Take on a role</b> on the day, or help support the team.</li>"
+        +"<li><b>Play an affected person</b> — a patient, family member, staff member or volunteer.</li>"
+        +"</ul>Signing up is quick and easy — there's a part for everyone.",
+      cta:{label:"Sign up to take part", href:CONFIG.jupiterLink}
+    },
+    {
+      key:"bc", icon:"🛡️", title:"Business Continuity", status:"live", statusLabel:"Live now",
+      one:"The Policy and new management system are live — take a look at your area.",
+      detail:"The Business Continuity Policy and the new <b>Business Continuity Management System (BCMS)</b> are now live. Have a look and start thinking about what continuity means for your own team and service."
+        +"<ul><li>I've recently delivered workshops with <b>IPU, KICS and the Virtual Hospice</b>.</li>"
+        +"<li>Want the same approach for your team? Get in touch and I'll arrange one.</li></ul>",
+      cta:{label:"Request a workshop", href:mail("Business Continuity workshop")}
+    },
+    {
+      key:"training", icon:"🎓", title:"Incident Management Training", status:"live", statusLabel:"Live now",
+      one:"All courses are now open to book on KLMS — open to everyone.",
+      detail:"All agreed incident management training is now bookable on <b>KLMS</b>: a 3-hour <b>Foundations of Incident Management</b> course plus short, bitesize resilience modules."
+        +"<ul><li>Designed for on-call managers and directors, but <b>open to anyone</b> — please encourage your teams to book on.</li>"
+        +"<li>Topics include: situational awareness, crisis decision-making, leading recovery, incident leadership, and working with partners.</li></ul>"
+        +"Just log in to your <b>KLMS account</b> to find the courses and book.",
+      cta:null
+    },
+    {
+      key:"lessons", icon:"💡", title:"Lessons Management Framework", status:"dev", statusLabel:"In development",
+      one:"One place to bring together every lesson from debriefs and exercises.",
+      detail:"A new framework to pull together insights from debriefs after <b>incidents, exercises and events</b>."
+        +"<ul><li>Every lesson identified will be collated in one place.</li>"
+        +"<li>Actions can be monitored through to completion.</li>"
+        +"<li>Over time this builds a <b>library of learning</b> for everyone to draw on.</li></ul>",
+      cta:null
+    },
+    {
+      key:"policies", icon:"📋", title:"Policies", status:"act", statusLabel:"Get involved",
+      one:"New SharePoint hub is built — I'm looking for testers soon.",
+      detail:"The recent <b>policy sprint</b> has set us up to move to a new structure and system. The new SharePoint site is built and will be ready for testing soon."
+        +"<ul><li>Automated reminders, invitations to contribute, and approvals.</li>"
+        +"<li>A simple search so staff can find the policy or procedure they need.</li>"
+        +"<li>Want to help test it? Get in touch.</li></ul>",
+      cta:{label:"Join the testing", href:mail("Policies SharePoint - testing")}
+    },
+    {
+      key:"risk", icon:"⚖️", title:"Risk Management Framework", status:"dev", statusLabel:"In development",
+      one:"A revised framework, starting with risk appetite and tolerance.",
+      detail:"A revised framework is being developed which will start with exploring <b>risk appetite and tolerance</b>."
+        +"<p>Two workshops have taken place with the Executive Team to start this work, and an updated Risk Management Framework has been drafted which aims to do the following:</p>"
+        +"<ul><li>A consistent framework for identifying, analysing and assessing risk, focused on impact.</li>"
+        +"<li>A clearer approach to how scoring is levelled and how risks are escalated and de-escalated.</li></ul>",
+      cta:null
+    }
+  ];
+
+  var grid = document.getElementById("grid");
+
+  function render(filter){
+    grid.innerHTML = "";
+    PROJECTS.forEach(function(p, i){
+      var show = (filter==="all" || p.status===filter);
+      var card = document.createElement("div");
+      card.className = "card" + (p.featured ? " featured":"");
+      if(!show) card.classList.add("hidden");
+
+      var ctaHtml = p.cta ? '<a class="cta" href="'+p.cta.href+'">'+p.cta.label+' →</a>' : '';
+      var ribbon = p.featured ? '<span class="ribbon">★ Featured this month</span>' : '';
+      var countHtml = p.countdown ? '<div class="count" id="cd-'+i+'"></div>' : '';
+
+      card.innerHTML =
+        ribbon +
+        '<div class="card-head">'+
+          '<span class="ic" aria-hidden="true">'+p.icon+'</span>'+
+          '<h2>'+p.title+'</h2>'+
+          '<span class="pill '+p.status+'">'+p.statusLabel+'</span>'+
+        '</div>'+
+        '<p class="one">'+p.one+'</p>'+
+        countHtml +
+        '<div class="detail"><div class="detail-inner">'+p.detail+
+          '<div class="row">'+ctaHtml+'</div>'+
+        '</div></div>'+
+        '<div class="row"><button class="more" aria-expanded="false">Read more ↓</button></div>';
+
+      grid.appendChild(card);
+
+      var btn = card.querySelector(".more");
+      var det = card.querySelector(".detail");
+      btn.addEventListener("click", function(){
+        var open = det.style.maxHeight && det.style.maxHeight !== "0px";
+        if(open){ det.style.maxHeight="0px"; btn.textContent="Read more ↓"; btn.setAttribute("aria-expanded","false"); }
+        else{ det.style.maxHeight = det.scrollHeight+40+"px"; btn.textContent="Show less ↑"; btn.setAttribute("aria-expanded","true"); }
+      });
+
+      if(p.countdown) startCountdown(document.getElementById("cd-"+i));
+    });
+  }
+
+  function startCountdown(box){
+    if(!box) return;
+    function tick(){
+      var diff = new Date(CONFIG.jupiterDate) - new Date();
+      if(diff <= 0){ box.innerHTML = '<div><b>Today!</b><span>It\'s happening</span></div>'; return; }
+      var d = Math.floor(diff/86400000);
+      var h = Math.floor(diff%86400000/3600000);
+      box.innerHTML = '<div><b>'+d+'</b><span>days</span></div><div><b>'+h+'</b><span>hours</span></div>';
+    }
+    tick(); setInterval(tick, 60000);
+  }
+
+  function counts(){
+    var n={live:0,dev:0,act:0};
+    PROJECTS.forEach(function(p){ n[p.status]++; });
+    document.getElementById("c-live").textContent=n.live;
+    document.getElementById("c-dev").textContent=n.dev;
+    document.getElementById("c-act").textContent=n.act;
+  }
+
+  document.getElementById("filters").addEventListener("click", function(e){
+    var b = e.target.closest(".chip"); if(!b) return;
+    document.querySelectorAll("#filters .chip").forEach(function(c){ c.setAttribute("aria-pressed","false"); });
+    b.setAttribute("aria-pressed","true");
+    render(b.dataset.f);
+  });
+
+  counts();
+  render("all");
+</script>
+</body>
+</html>
